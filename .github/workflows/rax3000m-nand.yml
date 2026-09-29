@@ -39,9 +39,13 @@ jobs:
       - name: Setup feeds and apply patches
         working-directory: openwrt
         run: |
+          # 关键：feeds.conf 存在时会整体遮蔽 feeds.conf.default，
+          # 必须先复制默认 feed 列表再追加，否则 luci/packages 等基础 feed 不会被拉取
+          cat feeds.conf.default > feeds.conf
           # iStore 官方 feed（luci-app-store / taskd / luci-lib-taskd / luci-lib-xterm）
           echo "src-git istore https://github.com/linkease/istore;main" >> feeds.conf
           ./scripts/feeds update -a
+          ./scripts/feeds install -a
           ./scripts/feeds install -d y -f -p istore luci-app-store taskd luci-lib-taskd luci-lib-xterm
           # OpenClash 最新版（vernesong master）
           git clone --depth 1 https://github.com/vernesong/openclash /tmp/openclash
